@@ -11,6 +11,7 @@ Consultas passam pelo Prisma. O DDL, com as restrições CHECK, continua em `sql
 3. `npm install`
 4. `npm run db:setup`
 5. `npm start` — http://localhost:3333
+6. Documentação Swagger — http://localhost:3333/api/docs
 
 Banco local: `postgres://sislar:sislar@localhost:5432/sislar`
 

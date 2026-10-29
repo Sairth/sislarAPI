@@ -31,6 +31,18 @@ describe("autenticação", () => {
     assert.equal(response.body.database, "up");
   });
 
+  it("publica a documentação OpenAPI", async () => {
+    const spec = await request(app).get("/api/openapi.json");
+    const docs = await request(app).get("/api/docs/");
+    assert.equal(spec.status, 200);
+    assert.equal(spec.body.openapi, "3.0.3");
+    assert.equal(spec.body.paths["/api/auth/login"].post.summary, "Entrar");
+    assert.equal(spec.body.paths["/api/visitas/{id}/saida"].patch.summary, "Registrar saída da visita");
+    assert.equal(docs.status, 200);
+    assert.match(docs.headers["content-type"], /html/);
+    assert.match(docs.text, /SISLAR API/);
+  });
+
   it("rejeita JSON quebrado", async () => {
     const response = await request(app).post("/api/auth/login").set("Content-Type", "application/json").send("{");
     assert.equal(response.status, 400);

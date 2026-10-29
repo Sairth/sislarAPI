@@ -2,8 +2,10 @@ import cors from "cors";
 import express from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
+import swaggerUi from "swagger-ui-express";
 import { config } from "./config.js";
 import { prisma } from "./db/prisma.js";
+import { openapi } from "./docs/openapi.js";
 import { asyncHandler } from "./middleware/async.js";
 import { errorHandler, notFound } from "./middleware/error.js";
 import authRouter from "./routes/auth.js";
@@ -42,6 +44,21 @@ app.get("/", (_req, res) => {
 app.get("/api/health", asyncHandler(async (_req, res) => {
   await prisma.$queryRaw`SELECT 1`;
   res.json({ status: "ok", database: "up" });
+}));
+
+app.get("/api/openapi.json", (_req, res) => {
+  res.json(openapi);
+});
+
+app.use("/api/docs", (_req, res, next) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; base-uri 'self'; font-src 'self' data:; img-src 'self' data: blob:; object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'",
+  );
+  next();
+}, swaggerUi.serve, swaggerUi.setup(openapi, {
+  customSiteTitle: "SISLAR API",
+  swaggerOptions: { persistAuthorization: true },
 }));
 
 app.use("/api/auth", authRouter);
